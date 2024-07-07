@@ -18,7 +18,7 @@ def get_merchant(mid):
     merch_repo_sql = MerchantsRepositorySQL()
     if merchant := merch_repo_sql.view(mid):
         places = PlacesRepositorySQL().index(
-            filter={"merchant_id": merchant.merchant_id}
+            filter={merch_repo_sql.primary_key: merchant.merchant_id}
         )
         place = places.pop().place_id
 
