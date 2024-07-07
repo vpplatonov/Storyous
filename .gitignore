@@ -1,0 +1,6 @@
+/_docs/
+/backend/data
+**/__pycache__
+.vscode
+.vs
+.idea

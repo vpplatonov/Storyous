@@ -1,0 +1,40 @@
+version: "3.4"
+volumes:
+  files:
+  sqlvolume:
+
+services:
+  worker:
+    build:
+      context: ./backend
+      dockerfile: ./.docker/Dockerfile
+      target: worker
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      STORY_API_CLIENT_ID: ${STORY_API_CLIENT_ID}
+      STORY_API_CLIENT_SECRET: ${STORY_API_CLIENT_SECRET}
+      STORY_API_LOGIN: ${STORY_API_LOGIN}
+      STORY_API_URL: ${STORY_API_URL}
+      STORY_API_MERCHANT_ID: ${STORY_API_MERCHANT_ID}
+      MSSQL_PASSWORD: ${MSSQL_PASSWORD}
+      MSSQL_USERNAME: ${MSSQL_USERNAME}
+      MSSQL_SERVER: mssql
+      MSSQL_DB_NAME: ${MSSQL_DB_NAME}
+    volumes:
+      - ./backend/app:/home/app
+    depends_on:
+      - mssql
+    restart: "no"
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    hostname: mssql
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD}
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      MSSQL_PID: ${MSSQL_PID}
+    volumes:
+      - sqlvolume:/var/opt/mssql
+    ports:
+      - "1433:1433"
+    restart: unless-stopped
