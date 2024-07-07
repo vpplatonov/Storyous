@@ -184,9 +184,6 @@ class BillsRepositorySQL(RepositoryMSSQL[BillsSQL]):
             AND {self.json_to_sql.field_value_parser(source.till_date, div='')} >= bills.created_at
         """ if source else ""
 
-        if not sql_query:
-            raise NotImplementedError("")
-
         data = self.exec_fetch_all(sql_query)
 
         return data

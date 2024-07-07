@@ -50,7 +50,7 @@ class APIModelSQL(APIModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if 'pid' in kwargs:
-            setattr(self, 'pid', int(kwargs['pid']))
+            setattr(self, 'pid', kwargs['pid'])
 
     if PYDANTIC_VERSION[0] == "2":
         model_config = ConfigDict(

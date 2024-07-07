@@ -31,8 +31,7 @@ class BearerService:
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
             # Check token in DB
-            old_token = None
-            if self.token is None:
+            if (old_token := self.token) is None:
                 repos = ClientsAndAuthRepositorySQL()
                 if (old_token := repos.view(
                     {repos.primary_key: self.payload.get(repos.primary_key)}

@@ -41,6 +41,7 @@ def get_store_bills(source_id: SourceId):
             try:
                 bll.place_id = source_id.place_id
                 BillsRepositorySQL().create_with_fk(bll)
+                print(f"{bll.bill_id=} imported")
             except CrudDataMSSQLError as e:
                 # print(str(e))   # if DEBUG
                 # already in DB
