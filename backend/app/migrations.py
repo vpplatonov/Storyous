@@ -83,7 +83,7 @@ if __name__ == '__main__':
         merchant_id=merchant_id,
         place_id=place_id,
         from_date=datetime.utcnow() - timedelta(
-            weeks=2  # week == 1 return 7 bills
+            weeks=10  # week == 1 return 7 bills
         ),  # ISO format,
         till_date=datetime.utcnow(),
         limit=20,

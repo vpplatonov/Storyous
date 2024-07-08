@@ -23,6 +23,7 @@ class BearerService:
         "grant_type": "client_credentials"
     }
     token: BearerToken = None
+    endpoint: str = settings.story_api_login  # url + endpoint
 
     @staticmethod
     def sql_decorator(func):

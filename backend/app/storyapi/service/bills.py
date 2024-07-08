@@ -17,4 +17,4 @@ class BillsListAPI(ABCStoryService[BillsList]):
     def get_url(self, source: SourceId) -> str:
         source_id = source.get_source_id()
         source_dump = source.model_dump(exclude=source_set, by_alias=True, exclude_none=True)
-        return super().get_url(source_id, **source_dump)
+        return super(BillsListAPI, self).get_url(source_id, **source_dump)

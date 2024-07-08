@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Union, Any
 
 from fastapi_utils.api_model import APIModel
 from pydantic import Field, model_validator
@@ -134,7 +134,8 @@ class BillsList(APIModel):
     nextPage: "/bills/5a75b658f60a3c15009312f1-5a75b658f60a3c15009312f2?lastBillId=BA2018000001"
     """
     data: List[Bills] = Field(default_factory=list, alias='data')
-    nextPage: str | SourceId | None
+    nextPage: Any | None
+    ok: bool | None = Field(default=None)
 
     @model_validator(mode="before")
     def fill_empty_fields(cls, v):
@@ -142,6 +143,6 @@ class BillsList(APIModel):
             source = SourceId.parse_source_id(next_page)
             for i in range(len(v["data"])):
                 v["data"][i]["place_id"] = source.place_id
-            v["nextPage"] = SourceId
+            v["nextPage"] = source
 
         return v
