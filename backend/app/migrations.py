@@ -51,6 +51,7 @@ def get_store_bills(source_id: SourceId):
         if not bills_list.nextPage:
             break
         source_id = bills_list.nextPage
+        print(f"nextPage API request: {source_id=}")
 
     return source_id
 
@@ -60,14 +61,14 @@ def get_store_bill_details(bill_ids_list: List[Dict], source_id: SourceId):
 
     bills_api = BillsAPI()
     bills_repository = BillsRepositorySQL()
+    bills_pk = BillsRepositorySQL.primary_key
 
     for bll in bill_ids_list:
         # bet Detailed Bill
         bll = bills_api.get_story_api_data(source_id, bll.get("bill_id"))
-        pk = BillsRepositorySQL.primary_key
         # bill will be updated; other dependencies -> delete/insert
         bills_repository.update_with_fk(
-            bll, query={pk: getattr(bll, pk)}
+            bll, query={bills_pk: getattr(bll, bills_pk)}
         )
         print(f"{bll.bill_id=} updated with items: {','.join([i.name for i in bll.items])}")
 
