@@ -41,11 +41,11 @@ def get_store_bills(source_id: SourceId):
             try:
                 bll.place_id = source_id.place_id
                 BillsRepositorySQL().create_with_fk(bll)
-                print(f"{bll.bill_id=} imported")
+                print(f"{bll.bill_id=} {bll.created_at} imported")
             except CrudDataMSSQLError as e:
                 # print(str(e))   # if DEBUG
                 # already in DB
-                print(f"Already in DB {bll.bill_id=}")
+                print(f"Already in DB {bll.bill_id=} {bll.created_at}")
                 pass
 
         if not bills_list.nextPage:
@@ -70,7 +70,7 @@ def get_store_bill_details(bill_ids_list: List[Dict], source_id: SourceId):
         bills_repository.update_with_fk(
             bll, query={bills_pk: getattr(bll, bills_pk)}
         )
-        print(f"{bll.bill_id=} updated with items: {','.join([i.name for i in bll.items])}")
+        print(f"{bll.bill_id=} {bll.created_at} items: {','.join([i.name for i in bll.items])}")
 
 
 if __name__ == '__main__':
@@ -86,12 +86,20 @@ if __name__ == '__main__':
             weeks=10  # week == 1 return 7 bills
         ),  # ISO format,
         till_date=datetime.utcnow(),
-        limit=20,
-        refunded=True
+        limit=10,
+        refunded=False
     ))
 
+    # get all bill_id's from data range and ignore it on importing before send to DB
     get_store_bills(source)
 
     # get list of imported bills from DB
+    bills = BillsRepositorySQL().get_wo_items(source)
+    get_store_bill_details(bills, source)
+
+    source.refunded = True
+    source.last_bill_id = None
+
+    get_store_bills(source)
     bills = BillsRepositorySQL().get_wo_items(source)
     get_store_bill_details(bills, source)

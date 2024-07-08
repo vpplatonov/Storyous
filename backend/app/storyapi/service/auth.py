@@ -1,5 +1,6 @@
 import functools
-from datetime import datetime
+import time
+from datetime import datetime, timezone
 from typing import Generic, get_args
 
 import pydantic
@@ -52,9 +53,10 @@ class BearerService:
     def update_client_with_token(self):
         client_and_auth = AuthSQL(**(self.token.model_dump() | self.payload))
         ClientsAndAuthRepositorySQL().insert_update(client_and_auth)
+        print(f"token updated: {self.token.expires_at}")
 
     def is_token_expired(self) -> bool:
-        return self.token is None or self.token.expires_at < datetime.utcnow()
+        return self.token is None or self.token.expires_at < datetime.now(timezone.utc)
 
     @sql_decorator
     def get_token(self, *args, **kwargs) -> BearerToken | None:
@@ -63,21 +65,30 @@ class BearerService:
         if not self.is_token_expired():
             return self.token
 
-        response = requests.request(
-            "POST",
-            settings.story_api_login,
-            headers=self.headers,
-            data=param_to_str(self.payload)
-        )
+        response = None
+        while True:
+            try:
+                # may return not valid token
+                response = requests.request(
+                    "POST",
+                    settings.story_api_login,
+                    headers=self.headers,
+                    data=param_to_str(self.payload)
+                )
 
-        try:
-            self.token = BearerToken(**response.json())
-        except (pydantic.ValidationError, requests.exceptions.JSONDecodeError):
-            if response.status_code != 200:
-                raise requests.HTTPError(response=response)
-            return None
-        else:
-            return self.token
+                self.token = BearerToken(**response.json())
+
+            except pydantic.ValidationError as e:
+                print(str(e))
+                print(str(response.json()))
+                time.sleep(10)
+                continue
+            except requests.exceptions.JSONDecodeError:
+                if response and response.status_code != 200:
+                    raise requests.HTTPError(response=response)
+                return None
+            else:
+                return self.token
 
 
 class ABCStoryService(Generic[T], BearerService):
@@ -92,7 +103,7 @@ class ABCStoryService(Generic[T], BearerService):
 
     def __new__(cls, *args, **kwargs):
         if cls.endpoint is None:
-            raise NotImplementedError(f"Class must be defined {cls.endpoint=}")
+            raise NotImplementedError(f"Class must define {cls.endpoint=}")
 
         return super(ABCStoryService, cls).__new__(cls, *args, **kwargs)
 
@@ -111,15 +122,28 @@ class ABCStoryService(Generic[T], BearerService):
         :raises: TypeError, ValueError, requests.exceptions.InvalidURL
         """
         url = self.get_url(*args, **kwargs)
-        token = self.get_token()
-        response = requests.request(
-            self.method,
-            url,
-            headers={"Authorization": f"{token.token_type} {token.access_token}"}
-        )
+        while True:
+            try:
+                token = self.get_token()
+                response = requests.request(
+                    self.method,
+                    url,
+                    headers={"Authorization": f"{token.token_type} {token.access_token}"}
+                )
+            except (requests.exceptions.ConnectionError,
+                    requests.exceptions.SSLError) as e:
+                # start from last bill
+                print(f"Error {e}; sleep 10 sec")
+                time.sleep(10)
+            else:
+                break
 
         try:
             res = self.model(**response.json())
+        except TypeError as e:
+            print(str(e))
+            print(str(response.json()))
+            return None
         except requests.exceptions.JSONDecodeError:
             return None
         else:

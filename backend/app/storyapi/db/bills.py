@@ -1,14 +1,14 @@
 import json
-from typing import List, Union, Any
+from typing import List, Any
 
 from fastapi_utils.api_model import APIModel
 from pydantic import Field, model_validator
 
+from storyapi.db import SourceId
 from storyapi.db.bills_sql import (
     TaxesSQL, PersonSQL, PaymentsSQL, OrderProviderSQL,
     FiscalDataSQL, InvoiceDataSQL, ItemsSQL, BillsSQL
 )
-from storyapi.db import SourceId
 
 
 class Taxes(TaxesSQL):
@@ -45,14 +45,14 @@ class Bills(BillsSQL):
         alias='place',
         json_schema_extra=dict(primary_key="place_id")
     )
-    taxes: List[Taxes] = Field(
-        default_factory=list,
+    taxes: List[Taxes] | None = Field(
+        default=None,
         alias='taxes',
         exclude=True,
         json_schema_extra=dict(foreign_key="bill_id")
     )
-    payments: List[Payments] | List[str] = Field(
-        default_factory=list,
+    payments: List[Payments] | None = Field(
+        default=None,
         alias='payments',
         exclude=True,
         json_schema_extra=dict(foreign_key="bill_id")
@@ -74,7 +74,7 @@ class Bills(BillsSQL):
         json_schema_extra=dict(foreign_key="bill_id")
     )
     invoice_data: List[InvoiceData] | None = Field(
-        default_factory=List,
+        default=None,
         alias='invoiceData',
         exclude=True,
         json_schema_extra=dict(foreign_key="bill_id")
