@@ -4,9 +4,11 @@ import pytest
 
 from storyapi.config.settings import settings
 from storyapi.db import SourceId
-from storyapi.db.auth import ClientsAndAuthRepositorySQL, AuthSQL
+from storyapi.db.auth import AuthSQL
+from storyapi.db.repos.auth_sql import ClientsAndAuthRepositorySQL
 from storyapi.db.merchants import Merchant
-from storyapi.db.merchants_sql import MerchantsRepositorySQL, MerchantsSQL
+from storyapi.db.merchants_sql import MerchantsSQL
+from storyapi.db.repos.merchants_sql import MerchantsRepositorySQL
 
 
 @pytest.fixture(name="merchant_sql")

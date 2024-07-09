@@ -3,7 +3,10 @@ from typing import List
 from pydantic import Field, field_validator, model_validator
 
 from storyapi.config.settings import settings
-from storyapi.db.auth import ClientsAndAuthRepositorySQL, AuthSQL
+from storyapi.db.auth import AuthSQL
+
+if settings.mssql_server:
+    from storyapi.db.repos.auth_sql import ClientsAndAuthRepositorySQL
 from storyapi.db.merchants_sql import AddressPartsSQL, PlacesSQL, MerchantsSQL
 
 
@@ -35,7 +38,7 @@ class Merchant(MerchantsSQL):
     PlaceID: 60b6512e66943300381c2d25
     """
     client_id: AuthSQL | str | None = Field(
-        ...,
+        default=settings.story_api_client_id,
         json_schema_extra=dict(primary_key="client_id")
     )
     places: List[Places] = Field(
@@ -60,7 +63,7 @@ class Merchant(MerchantsSQL):
         if client_id is None:
             client_id = settings.story_api_client_id
 
-        if client_id is not None:
+        if settings.mssql_server and client_id is not None:
             values["client_id"] = ClientsAndAuthRepositorySQL().view({
                 "client_id": client_id
             })

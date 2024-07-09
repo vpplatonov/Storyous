@@ -9,7 +9,9 @@ import requests
 from common.config import T
 from storyapi.config import param_to_str
 from storyapi.config.settings import settings
-from storyapi.db.auth import BearerToken, ClientsAndAuthRepositorySQL, AuthSQL
+from storyapi.db.auth import BearerToken, AuthSQL
+if settings.mssql_server:
+    from storyapi.db.repos.auth_sql import ClientsAndAuthRepositorySQL
 
 
 class BearerService:
@@ -27,28 +29,31 @@ class BearerService:
     endpoint: str = settings.story_api_login  # url + endpoint
 
     @staticmethod
-    def sql_decorator(func):
-        """ TODO: add parameter if MSSQL_SERVER defined """
+    def sql_enabled_decorator(sql_server):
+        """ parameter if MSSQL_SERVER defined """
+        def sql_decorator(func):
+            @functools.wraps(func)
+            def wrapper(self, *args, **kwargs):
+                if not sql_server:
+                    return func(self, *args, **kwargs)
 
-        @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):
-            # Check token in DB
-            if (old_token := self.token) is None:
-                repos = ClientsAndAuthRepositorySQL()
-                if (old_token := repos.view(
-                    {repos.primary_key: self.payload.get(repos.primary_key)}
-                )) is not None:
-                    self.token = BearerToken(**old_token.model_dump())
+                # Check token in DB
+                if (old_token := self.token) is None:
+                    repos = ClientsAndAuthRepositorySQL()
+                    if (old_token := repos.view(
+                        {repos.primary_key: self.payload.get(repos.primary_key)}
+                    )) is not None:
+                        self.token = BearerToken(**old_token.model_dump())
 
-            token = func(self, *args, **kwargs)
+                token = func(self, *args, **kwargs)
 
-            # extra ignored by def AND is token changed
-            if token and (old_token is None or token.access_token != old_token.access_token):
-                self.update_client_with_token()
+                # extra ignored by def AND is token changed
+                if token and (old_token is None or token.access_token != old_token.access_token):
+                    self.update_client_with_token()
 
-            return token
-
-        return wrapper
+                return token
+            return wrapper
+        return sql_decorator
 
     def update_client_with_token(self):
         client_and_auth = AuthSQL(**(self.token.model_dump() | self.payload))
@@ -58,7 +63,7 @@ class BearerService:
     def is_token_expired(self) -> bool:
         return self.token is None or self.token.expires_at < datetime.now(timezone.utc)
 
-    @sql_decorator
+    @sql_enabled_decorator(settings.mssql_server)
     def get_token(self, *args, **kwargs) -> BearerToken | None:
         """the tokens have to be cached on the OAuth client side"""
 
@@ -122,6 +127,7 @@ class ABCStoryService(Generic[T], BearerService):
         :raises: TypeError, ValueError, requests.exceptions.InvalidURL
         """
         url = self.get_url(*args, **kwargs)
+        response = None
         while True:
             try:
                 token = self.get_token()
@@ -130,21 +136,21 @@ class ABCStoryService(Generic[T], BearerService):
                     url,
                     headers={"Authorization": f"{token.token_type} {token.access_token}"}
                 )
+                res = self.model(**response.json())
+
+            except TypeError as e:
+                print(str(e))
+                if response and response.status_code == 200:
+                    print(str(response.json()))
+                return None
+            except requests.exceptions.JSONDecodeError:
+                if response and response.status_code == 200:
+                    print(str(response.text))
+                return None
             except (requests.exceptions.ConnectionError,
                     requests.exceptions.SSLError) as e:
                 # start from last bill
                 print(f"Error {e}; sleep 10 sec")
                 time.sleep(10)
             else:
-                break
-
-        try:
-            res = self.model(**response.json())
-        except TypeError as e:
-            print(str(e))
-            print(str(response.json()))
-            return None
-        except requests.exceptions.JSONDecodeError:
-            return None
-        else:
-            return res
+                return res

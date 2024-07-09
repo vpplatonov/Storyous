@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from fastapi_utils.api_model import APIModel
 from pydantic import Field, field_validator
 
-from common.db.mssql import RepositoryMSSQL
+from common.services.cypher import Cypher
 from storyapi.config.settings import settings
 
 
@@ -30,7 +30,10 @@ class AuthSQL(BearerToken):
     secret: str = Field(default=settings.story_api_client_secret, alias='secret')
     client_name: str = Field(default="The Miners Borislavka s.r.o.", alias='client_name')
 
+    @field_validator("secret", mode='before')
+    def check_secret_decrypt(cls, p, values):
 
-class ClientsAndAuthRepositorySQL(RepositoryMSSQL[AuthSQL]):
-    primary_key = "client_id"
-    pk_remove_on_create = False
+        if p and isinstance(p, bytes):
+            p = Cypher().decrypt(p)
+
+        return p

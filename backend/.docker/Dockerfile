@@ -19,7 +19,7 @@ ENV BASE_PATH="/home/app"
 WORKDIR ${BASE_PATH}
 COPY ./app/setup.cfg ${BASE_PATH}
 COPY ./app/pyproject.toml ${BASE_PATH}
-RUN pip install --upgrade pip && pip install .
+RUN pip install --upgrade pip && pip install .[mssql-service]
 
 COPY ./app/ ${BASE_PATH}
 
