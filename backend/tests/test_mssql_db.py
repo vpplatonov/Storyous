@@ -6,7 +6,7 @@ from storyapi.config.settings import settings
 from storyapi.db import SourceId
 from storyapi.db.auth import ClientsAndAuthRepositorySQL, AuthSQL
 from storyapi.db.merchants import Merchant
-from storyapi.db.merchants_sql import MerchantsRepositorySQL
+from storyapi.db.merchants_sql import MerchantsRepositorySQL, MerchantsSQL
 
 
 @pytest.fixture(name="merchant_sql")
@@ -58,11 +58,13 @@ def test_client_and_auth():
 
 def test_merchant(merchant_sql):
     repos = MerchantsRepositorySQL()
-    if not repos.view({
+    if (merchant := repos.view({
         repos.primary_key: getattr(merchant_sql, repos.primary_key)
-    }):
+    })) is None:
         res = repos.create_with_fk(merchant_sql)
         assert res is not None
+    else:
+        assert isinstance(merchant, MerchantsSQL)
 
 
 def test_get_store_bills(merchant_sql):
