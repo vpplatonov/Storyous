@@ -3,6 +3,11 @@ from typing import Literal
 from fastapi_utils.api_model import APIModel
 from pydantic import Field
 
+from common.config import settings
+
+if settings.mssql_server:
+    from common.db.mssql import RepositoryMSSQL
+
 
 class AddressPartsSQL(APIModel):
     """ Same for AddressParts """
@@ -34,3 +39,22 @@ class MerchantsSQL(APIModel):
     is_vat_payer: bool = Field(..., alias='isVatPayer')
     country_code: str = Field(..., alias='countryCode')  # = "CZ"
     currency_code: str = Field(..., alias='currencyCode')  # = "CZK"
+
+
+if settings.mssql_server:
+    class AddressPartsRepositorySQL(RepositoryMSSQL[AddressPartsSQL]):
+        primary_key = "place_id"
+        pk_remove_on_create = False
+
+
+    class PlacesRepositorySQL(RepositoryMSSQL[PlacesSQL]):
+        primary_key = "place_id"
+        pk_remove_on_create = False
+        excluded_fields = {"address_parts"}
+
+
+    class MerchantsRepositorySQL(RepositoryMSSQL[MerchantsSQL]):
+        """ External primary key: do not pointed it """
+        primary_key = "merchant_id"
+        pk_remove_on_create = False
+        excluded_fields = {"places"}

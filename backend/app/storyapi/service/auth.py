@@ -11,99 +11,99 @@ from storyapi.config import param_to_str
 from storyapi.config.settings import settings
 from storyapi.db.auth import BearerToken, AuthSQL
 if settings.mssql_server:
-    from storyapi.db.repos.auth_sql import ClientsAndAuthRepositorySQL
+    from storyapi.db.auth import ClientsAndAuthRepositorySQL
 
 
-class BearerService:
-    # Header
-    headers: dict = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-    # Body: must be merged by & sign
-    payload: dict = {
-        "client_id": settings.story_api_client_id,
-        "client_secret": settings.story_api_client_secret,
-        "grant_type": "client_credentials"
-    }
-    token: BearerToken = None
-    endpoint: str = settings.story_api_login  # url + endpoint
-
-    @staticmethod
-    def sql_enabled_decorator(sql_server):
-        """ parameter if MSSQL_SERVER defined """
-        def sql_decorator(func):
-            @functools.wraps(func)
-            def wrapper(self, *args, **kwargs):
-                if not sql_server:
-                    return func(self, *args, **kwargs)
-
-                # Check token in DB
-                if (old_token := self.token) is None:
-                    repos = ClientsAndAuthRepositorySQL()
-                    if (old_token := repos.view(
-                        {repos.primary_key: self.payload.get(repos.primary_key)}
-                    )) is not None:
-                        self.token = BearerToken(**old_token.model_dump())
-
-                token = func(self, *args, **kwargs)
-
-                # extra ignored by def AND is token changed
-                if token and (old_token is None or token.access_token != old_token.access_token):
-                    self.update_client_with_token()
-
-                return token
-            return wrapper
-        return sql_decorator
-
-    def update_client_with_token(self):
-        client_and_auth = AuthSQL(**(self.token.model_dump() | self.payload))
-        ClientsAndAuthRepositorySQL().insert_update(client_and_auth)
-        print(f"token updated: {self.token.expires_at}")
-
-    def is_token_expired(self) -> bool:
-        return self.token is None or self.token.expires_at < datetime.now(timezone.utc)
-
-    @sql_enabled_decorator(settings.mssql_server)
-    def get_token(self, *args, **kwargs) -> BearerToken | None:
-        """the tokens have to be cached on the OAuth client side"""
-
-        if not self.is_token_expired():
-            return self.token
-
-        response = None
-        while True:
-            try:
-                # may return not valid token
-                response = requests.request(
-                    "POST",
-                    settings.story_api_login,
-                    headers=self.headers,
-                    data=param_to_str(self.payload)
-                )
-
-                self.token = BearerToken(**response.json())
-
-            except pydantic.ValidationError as e:
-                print(str(e))
-                print(str(response.json()))
-                time.sleep(10)
-                continue
-            except requests.exceptions.JSONDecodeError:
-                if response and response.status_code != 200:
-                    raise requests.HTTPError(response=response)
-                return None
-            else:
-                return self.token
+headers: dict = {
+    "Content-Type": "application/x-www-form-urlencoded"
+}
+# Body: must be merged by & sign
+payload: dict = {
+    "client_id": settings.story_api_client_id,
+    "client_secret": settings.story_api_client_secret,
+    "grant_type": "client_credentials"
+}
 
 
-class ABCStoryService(Generic[T], BearerService):
+def sql_enabled_decorator(func):
+    """ parameter if MSSQL_SERVER defined """
+    @functools.wraps(func)
+    def wrapper(token: BearerToken = None):
+        # Check token in DB
+        # token = token or wrapper.token
+        if (old_token := token) is None and settings.mssql_server:
+            repos = ClientsAndAuthRepositorySQL()
+            if (old_token := repos.view(
+                {repos.primary_key: payload.get(repos.primary_key)}
+            )) is not None:
+                token = BearerToken(**old_token.model_dump())
+
+        token = func(token=token)
+
+        # extra ignored by def AND is token changed
+        if token and (old_token is None or token.access_token != old_token.access_token):
+            # wrapper.token = token
+            if settings.mssql_server:
+                update_client_with_token(token)
+
+        return token
+
+    # wrapper.token = None
+    return wrapper
+
+
+def update_client_with_token(token):
+    client_and_auth = AuthSQL(**(token.model_dump() | payload))
+    ClientsAndAuthRepositorySQL().insert_update(client_and_auth)
+
+
+def is_token_expired(token) -> bool:
+    return token is None or token.expires_at < datetime.now(timezone.utc)
+
+
+@sql_enabled_decorator
+def get_token(token: BearerToken = None) -> BearerToken | None:
+    """the tokens have to be cached on the OAuth client side"""
+
+    if not is_token_expired(token):
+        return token
+
+    response = None
+    while True:
+        try:
+            # may return not valid token
+            response = requests.request(
+                "POST",
+                settings.story_api_login,
+                headers=headers,
+                data=param_to_str(payload)
+            )
+
+            token = BearerToken(**response.json())
+
+        except pydantic.ValidationError as e:
+            print(str(e))
+            print(str(response.json()))
+            time.sleep(10)
+            continue
+        except requests.exceptions.JSONDecodeError:
+            if response and response.status_code != 200:
+                raise requests.HTTPError(response=response)
+            return None
+        else:
+            print(f"token changed {token.expires_at=}")
+            return token
+
+
+class ABCStoryService(Generic[T]):
     """Abstract class for story service"""
 
     method: str = "GET"
     endpoint: str | None = None
+    token: BearerToken = get_token()
 
     def __init__(self):
-        super(ABCStoryService, self).__init__()
+        # super(ABCStoryService, self).__init__()
         self.model = get_args(self.__orig_bases__[0])[0]  # Magic
 
     def __new__(cls, *args, **kwargs):
@@ -130,13 +130,14 @@ class ABCStoryService(Generic[T], BearerService):
         response = None
         while True:
             try:
-                token = self.get_token()
+                token = get_token(token=self.token)
                 response = requests.request(
                     self.method,
                     url,
                     headers={"Authorization": f"{token.token_type} {token.access_token}"}
                 )
                 res = self.model(**response.json())
+                self.token = token
 
             except TypeError as e:
                 print(str(e))

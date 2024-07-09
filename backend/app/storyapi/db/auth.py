@@ -3,8 +3,11 @@ from datetime import datetime, timezone
 from fastapi_utils.api_model import APIModel
 from pydantic import Field, field_validator
 
-from common.services.cypher import Cypher
 from storyapi.config.settings import settings
+from common.services.cypher import Cypher
+
+if settings.mssql_server:
+    from common.db.mssql import RepositoryMSSQL
 
 
 class BearerToken(APIModel):
@@ -37,3 +40,16 @@ class AuthSQL(BearerToken):
             p = Cypher().decrypt(p)
 
         return p
+
+
+if settings.mssql_server:
+    class ClientsAndAuthRepositorySQL(RepositoryMSSQL[AuthSQL]):
+        primary_key = "client_id"
+        pk_remove_on_create = False
+        encrypt_secret = False
+
+        def insert_update(self, data: AuthSQL):
+            if self.encrypt_secret and (secret := getattr(data, 'secret', None)) is not None:
+                data.secret = Cypher().encrypt(secret)
+
+            return super().insert_update(data)

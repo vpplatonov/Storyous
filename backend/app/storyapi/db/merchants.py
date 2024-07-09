@@ -4,9 +4,9 @@ from pydantic import Field, field_validator, model_validator
 
 from storyapi.config.settings import settings
 from storyapi.db.auth import AuthSQL
-
 if settings.mssql_server:
-    from storyapi.db.repos.auth_sql import ClientsAndAuthRepositorySQL
+    from storyapi.db.auth import ClientsAndAuthRepositorySQL
+
 from storyapi.db.merchants_sql import AddressPartsSQL, PlacesSQL, MerchantsSQL
 
 
