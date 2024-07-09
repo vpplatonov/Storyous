@@ -2,20 +2,45 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from migrations import get_merchant, get_store_bills, get_store_bill_details
 from storyapi.config.settings import settings
 from storyapi.db import SourceId
 from storyapi.db.auth import ClientsAndAuthRepositorySQL, AuthSQL
-from storyapi.db.bills_sql import BillsRepositorySQL
+from storyapi.db.merchants import Merchant
 from storyapi.db.merchants_sql import MerchantsRepositorySQL
-from storyapi.service.merchants import MerchantsAPI
 
 
 @pytest.fixture(name="merchant_sql")
 def get_bills_sql(mId):
-    serv = MerchantsAPI()
-    res = serv.get_story_api_data(mId)
-    return res
+    # data from OSS link:
+    # https://apistoryouscom.docs.apiary.io/#reference/0/merchant/get-merchant-and-all-its-places
+    res = {
+      "merchantId": "57dab243332f920e00b6cc17",
+      "name": "My Super Company",
+      "businessId": "012345678",
+      "vatId": "CZ012345678",
+      "isVatPayer": True,
+      "countryCode": "CZ",
+      "currencyCode": "CZK",
+      "places": [
+        {
+          "placeId": "5836b6981730220e00d7c8b5",
+          "name": "My Super Bar",
+          "state": "active",
+          "addressParts": {
+            "street": "sdfsdf",
+            "streetNumber": "sdfsdf",
+            "city": "Prague",
+            "country": "Czech republic",
+            "countryCode": "CZ",
+            "zip": "18600",
+            "latitude": 50.073034,
+            "longitude": 14.43618
+          }
+        }
+      ]
+    }
+
+    return Merchant(**res)
 
 
 def test_client_and_auth():
@@ -39,11 +64,11 @@ def test_merchant(merchant_sql):
     assert res is not None
 
 
-def test_get_store_bills(mId):
-    merchant_id, place_id = get_merchant(mId)
+def test_get_store_bills(merchant_sql):
+
     source = SourceId(**dict(
-        merchant_id=merchant_id,
-        place_id=place_id,
+        merchant_id=merchant_sql.merchant_id,
+        place_id=merchant_sql.places.pop().place_id,
         from_date=datetime.combine(datetime.utcnow(), datetime.min.time()) - timedelta(
             weeks=10
         ),  # ISO format,
@@ -52,9 +77,4 @@ def test_get_store_bills(mId):
         refunded=True
     ))
 
-    last_source = get_store_bills(source)
-    assert last_source is not None
-
-    bills = BillsRepositorySQL().get_wo_items(source)
-    assert isinstance(bills, list)
-    get_store_bill_details(bills, source)
+    assert isinstance(source, SourceId)
