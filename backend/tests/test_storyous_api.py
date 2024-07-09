@@ -25,20 +25,6 @@ def get_source_url_encoded():
     )
 
 
-@pytest.fixture(name="source_url")
-def get_source_url():
-    return (
-        'https://api.storyous.com/bills/'
-        '5a75b658f60a3c15009312f1-5a75b658f60a3c15009312f2'
-        '?from=2016-06-19T10:32:01Z'
-        '&till=2017-06-19T10:32:01Z'
-        '&limit=20'
-        '&lastBillId=BA2018000001'
-        '&modifiedSince=2016-06-19T10:32:01Z'
-        '&refunded=true'
-    )
-
-
 @pytest.fixture(name="source_id")
 def get_source_id(source_url_encoded):
     return SourceId.parse_source_id(source_url_encoded)
