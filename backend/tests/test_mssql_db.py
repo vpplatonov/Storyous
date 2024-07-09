@@ -57,11 +57,12 @@ def test_client_and_auth():
 
 
 def test_merchant(merchant_sql):
-    # if (merchant := MerchantsRepositorySQL().view({
-    #     "merchant_id": merchant_sql.merchant_id
-    # })) is None:
-    res = MerchantsRepositorySQL().create_with_fk(merchant_sql)
-    assert res is not None
+    repos = MerchantsRepositorySQL()
+    if not repos.view({
+        repos.primary_key: getattr(merchant_sql, repos.primary_key)
+    }):
+        res = repos.create_with_fk(merchant_sql)
+        assert res is not None
 
 
 def test_get_store_bills(merchant_sql):
