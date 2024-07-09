@@ -1,6 +1,7 @@
 import pytest
 
 from storyapi.config import param_to_str
+from storyapi.db.repos.bills_sql import BillsRepositorySQL
 from storyapi.service.auth import ABCStoryService
 from storyapi.db.bills import (
     BillsList, Bills
@@ -241,8 +242,11 @@ def test_bills(bills_list, source_id: SourceId, source_url_encoded: str):
 
 
 def test_bill_details(source_id, bill_detail):
-    bill = Bills(place_id=source_id.place_id, **bill_detail)
+    bill = Bills(placeId=source_id.place_id, **bill_detail)
     assert isinstance(bill, Bills)
 
     url = BillsAPI().get_url(source_id, bill.bill_id)
     assert isinstance(url, str)
+
+    bill.place_id = source_id.place_id
+    BillsRepositorySQL().create_with_fk(bill)

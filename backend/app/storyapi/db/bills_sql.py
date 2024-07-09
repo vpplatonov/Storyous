@@ -1,19 +1,11 @@
 import json
 from datetime import datetime
-from typing import Literal, Union, List, Dict
+from typing import Literal
 
 from fastapi_utils.api_model import APIModel
 from pydantic import Field, field_validator
 
-from common.config import settings
-
-if settings.mssql_server:
-    from pymssql import Cursor as pymssql_Cursor
-    from pyodbc import Cursor as pyodbc_Cursor
-    from common.db.mssql import RepositoryMSSQL
-
 from storyapi.config import convert_datetime
-from storyapi.db import SourceId
 
 
 class TaxesSQL(APIModel):
@@ -121,73 +113,3 @@ class BillsSQL(APIModel):
     )
     def convert_datetime(cls, v):
         return convert_datetime(v)
-
-
-if settings.mssql_server:
-    class TaxesRepositorySQL(RepositoryMSSQL[TaxesSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class PersonRepositorySQL(RepositoryMSSQL[PersonSQL]):
-        """ External primary key: do not pointed it """
-        pk_remove_on_create = False
-        primary_key = "person_id"
-
-
-    class PaymentsRepositorySQL(RepositoryMSSQL[PaymentsSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class OrderProviderRepositorySQL(RepositoryMSSQL[OrderProviderSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class FiscalDataRepositorySQL(RepositoryMSSQL[FiscalDataSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class InvoiceDataRepositorySQL(RepositoryMSSQL[InvoiceDataSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class ItemsRepositorySQL(RepositoryMSSQL[ItemsSQL]):
-        """ Use DB_PRIMARY_KEY as default primary key """
-
-
-    class BillsRepositorySQL(RepositoryMSSQL[BillsSQL]):
-        """ External primary key: do not pointed it """
-        pk_remove_on_create = False
-        primary_key = "bill_id"
-        excluded_fields = {
-            "taxes", "payments", "fiscal_data",
-            "invoice_data", "order_provider", "items"
-        }
-
-        def converted_select_insert(
-                self,
-                convert_data,
-                cursor: Union[pymssql_Cursor, pyodbc_Cursor]
-        ):
-            """ must be implemented for apps specific """
-            rs = self._converted_select_insert(convert_data, cursor)
-
-            return rs
-
-        def get_wo_items(self, source: SourceId = None) -> List[Dict]:
-            """
-            :return:
-            """
-
-            sql_query = """
-            SELECT bill_id
-            FROM storyous.bills
-            WHERE NOT EXISTS(SELECT 1 FROM storyous.items 
-                    WHERE items.bill_id = bills.bill_id) 
-            """ + f"""
-                AND {self.json_to_sql.field_value_parser(source.from_date, div='')} <= bills.created_at
-                AND {self.json_to_sql.field_value_parser(source.till_date, div='')} >= bills.created_at
-            """ if source else ""
-
-            data = self.exec_fetch_all(sql_query)
-
-            return data

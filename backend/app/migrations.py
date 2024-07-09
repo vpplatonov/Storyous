@@ -8,8 +8,8 @@ from typing import List, Dict
 from storyapi.config.settings import settings
 from storyapi.db import SourceId
 from common.db.mssql import CrudDataMSSQLError
-from storyapi.db.bills_sql import BillsRepositorySQL
-from storyapi.db.merchants_sql import PlacesRepositorySQL, MerchantsRepositorySQL
+from storyapi.db.repos.bills_sql import BillsRepositorySQL
+from storyapi.db.repos.marchants_sql import PlacesRepositorySQL, MerchantsRepositorySQL
 from storyapi.service.bills import BillsListAPI, BillsAPI
 from storyapi.service.merchants import MerchantsAPI
 

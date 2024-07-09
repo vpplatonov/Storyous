@@ -11,8 +11,7 @@ from storyapi.config import param_to_str
 from storyapi.config.settings import settings
 from storyapi.db.auth import BearerToken, AuthSQL
 if settings.mssql_server:
-    from storyapi.db.auth import ClientsAndAuthRepositorySQL
-
+    from storyapi.db.repos.auth import ClientsAndAuthRepositorySQL
 
 headers: dict = {
     "Content-Type": "application/x-www-form-urlencoded"

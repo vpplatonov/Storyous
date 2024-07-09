@@ -13,13 +13,14 @@ SCHEMA_BY_ALIAS = False
 SQL_REPOSITORY_POSTFIX = "RepositorySQL"
 __version__ = "0.1.0"
 __author__ = "Valerii Platonov"
+DB_PLUGIN_PATH = "storyapi.db.repos"
 
 
 def get_repository_for_model(
         model_type: str,
         prefix: str = '',
         plugin='merchants',
-        package="storyapi.db"  # Class.__module__.rsplit('.', maxsplit=1)[0]
+        package=DB_PLUGIN_PATH  # Class.__module__.rsplit('.', maxsplit=1)[0]
 ):
     """ Get Repository Module name (plugin) by class __name__ & __module__
 
@@ -31,6 +32,9 @@ def get_repository_for_model(
 
     if "." in plugin:
         package, plugin = plugin.rsplit('.', maxsplit=1)
+
+    if package in DB_PLUGIN_PATH:
+        package = DB_PLUGIN_PATH
 
     module = importlib.import_module(f".{plugin}_sql", package)
     model_type = model_type.replace('SQL', '')

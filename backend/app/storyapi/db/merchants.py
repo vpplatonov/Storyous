@@ -4,8 +4,9 @@ from pydantic import Field, field_validator, model_validator
 
 from storyapi.config.settings import settings
 from storyapi.db.auth import AuthSQL
+
 if settings.mssql_server:
-    from storyapi.db.auth import ClientsAndAuthRepositorySQL
+    from storyapi.db.repos.auth import ClientsAndAuthRepositorySQL
 
 from storyapi.db.merchants_sql import AddressPartsSQL, PlacesSQL, MerchantsSQL
 
@@ -25,8 +26,9 @@ class Places(PlacesSQL):
 
     @model_validator(mode='before')
     def check_address_parts(cls, values):
-        if values and (place_id := values.get("placeId", None)) is not None \
-                and 'addressParts' in values:
+        if (values and
+                (place_id := values.get("placeId", None)) is not None
+                and 'addressParts' in values):
             values['addressParts']["place_id"] = place_id  # ignore
 
             return values
