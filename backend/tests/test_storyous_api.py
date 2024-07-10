@@ -237,7 +237,7 @@ def test_bills(bills_list, source_id: SourceId, source_url_encoded: str):
     assert isinstance(url, str)
     assert url == source_url_encoded
 
-    url = BillsListAPI().get_url(bills.nextPage)
+    url = BillsListAPI().get_url(bills.next_page)
     assert isinstance(url, str)
 
 

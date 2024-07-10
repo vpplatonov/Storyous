@@ -8,12 +8,11 @@ from storyapi.config.settings import settings
 from storyapi.db import SourceId
 from storyapi.db.auth import AuthSQL
 from storyapi.db.bills import BillsList
-from storyapi.db.repos.auth import ClientsAndAuthRepositorySQL
 from storyapi.db.merchants import Merchant
 from storyapi.db.merchants_sql import MerchantsSQL
+from storyapi.db.repos.auth import ClientsAndAuthRepositorySQL
 from storyapi.db.repos.bills_sql import BillsRepositorySQL
 from storyapi.db.repos.marchants_sql import MerchantsRepositorySQL
-from storyapi.service.bills import BillsListAPI
 
 
 @pytest.fixture(name="merchant_sql")
@@ -147,4 +146,3 @@ def test_store_batch(load_test_json, source_id_work):
     assert bills_list.data[0].place_id is not None
     bills_list.check_place_id(place_id=source_id_work.place_id)
     BillsRepositorySQL().create_batch_with_fk(bills_list.data)
-
