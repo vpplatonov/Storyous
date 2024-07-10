@@ -28,13 +28,13 @@ AZURE_SQL_CONNECTION = (
     "Connection Timeout=30;"
 )
 SQL_COPT_SS_ACCESS_TOKEN = 1256  # This connection option is defined by microsoft in msodbcsql.h
+TOKEN_URL = "https://database.windows.net/.default"
 
 
 def get_azure_entra_token() -> bytes:
     """ Connect to Azure Entra default over MS ODBC python
 
     :param sami - system-assigned managed identity
-    https://learn.microsoft.com/en-us/python/api/overview/azure/identity-readme?view=azure-python#authenticate-with-a-system-assigned-managed-identity
     :raise CredentialUnavailableError
     """
 
@@ -46,7 +46,7 @@ def get_azure_entra_token() -> bytes:
     else:
         credential = DefaultAzureCredential(exclude_interactive_browser_credential=False)
 
-    token_bytes = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")
+    token_bytes = credential.get_token(TOKEN_URL).token.encode("UTF-16-LE")
     token_struct = struct.pack(f'<I{len(token_bytes)}s', len(token_bytes), token_bytes)
 
     return token_struct

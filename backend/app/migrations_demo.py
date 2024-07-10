@@ -1,5 +1,7 @@
 """
-Storyous API migration data to MSSQL
+Storyous demo
+API migration data without saving to MSSQL.
+for test download stability & performance issues of API endpoints.
 """
 from datetime import datetime, timedelta
 from typing import List, Dict
