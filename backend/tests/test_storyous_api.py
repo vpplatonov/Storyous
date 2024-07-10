@@ -19,7 +19,7 @@ def get_source_url_encoded():
         '5a75b658f60a3c15009312f1-5a75b658f60a3c15009312f2'
         '?from=2016-06-19T10%3A32%3A01Z'
         '&till=2017-06-19T10%3A32%3A01Z'
-        '&limit=20'
+        '&limit=10'
         '&lastBillId=BA2018000001'
         '&modifiedSince=2016-06-19T10%3A32%3A01Z'
         '&refunded=true'

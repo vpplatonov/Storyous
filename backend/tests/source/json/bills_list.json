@@ -1,0 +1,496 @@
+{
+  "data": [
+    {
+      "billId": "TM2024023170",
+      "sessionCreated": "2024-07-09T13:54:33+02:00",
+      "createdAt": "2024-07-09T20:29:30+02:00",
+      "paidAt": "2024-07-09T20:29:30+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 0,
+      "finalPriceWithoutTax": "0",
+      "taxSummaries": {},
+      "taxes": [],
+      "discount": 100,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "cash",
+      "payments": [
+        {
+          "paymentMethod": "cash",
+          "priceWithVat": "0"
+        }
+      ],
+      "createdBy": {
+        "personId": 202,
+        "fullName": "Vladimir Mashkin",
+        "userName": "mr_add"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "38",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T20:29:30+02:00"
+    },
+    {
+      "billId": "TM2024023169",
+      "sessionCreated": "2024-07-09T09:33:39+02:00",
+      "createdAt": "2024-07-09T20:29:18+02:00",
+      "paidAt": "2024-07-09T20:29:17+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 0,
+      "finalPriceWithoutTax": "0",
+      "taxSummaries": {},
+      "taxes": [],
+      "discount": 335,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "cash",
+      "payments": [
+        {
+          "paymentMethod": "cash",
+          "priceWithVat": "0"
+        }
+      ],
+      "createdBy": {
+        "personId": 267,
+        "fullName": "Hana Shaepe",
+        "userName": "hany_prochazkova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "3",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T20:29:18+02:00"
+    },
+    {
+      "billId": "TM2024023168",
+      "sessionCreated": "2024-07-09T20:04:50+02:00",
+      "createdAt": "2024-07-09T20:05:02+02:00",
+      "paidAt": "2024-07-09T20:05:01+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 115,
+      "finalPriceWithoutTax": "102.68",
+      "taxSummaries": {
+        "12": "12.32"
+      },
+      "taxes": [
+        {
+          "vat": "12",
+          "totalVat": "12.32",
+          "totalWithoutVat": "102.68"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "115"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T20:05:02+02:00"
+    },
+    {
+      "billId": "TM2024023167",
+      "sessionCreated": "2024-07-09T19:29:36+02:00",
+      "createdAt": "2024-07-09T19:29:51+02:00",
+      "paidAt": "2024-07-09T19:29:51+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 115,
+      "finalPriceWithoutTax": "102.68",
+      "taxSummaries": {
+        "12": "12.32"
+      },
+      "taxes": [
+        {
+          "vat": "12",
+          "totalVat": "12.32",
+          "totalWithoutVat": "102.68"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "115"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": "M4E6D346F7257504B",
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T19:29:52+02:00"
+    },
+    {
+      "billId": "TM2024023166",
+      "sessionCreated": "2024-07-09T19:23:03+02:00",
+      "createdAt": "2024-07-09T19:23:10+02:00",
+      "paidAt": "2024-07-09T19:23:10+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 85,
+      "finalPriceWithoutTax": "70.25",
+      "taxSummaries": {
+        "21": "14.75"
+      },
+      "taxes": [
+        {
+          "vat": "21",
+          "totalVat": "14.75",
+          "totalWithoutVat": "70.25"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "85"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T19:23:11+02:00"
+    },
+    {
+      "billId": "TM2024023165",
+      "sessionCreated": "2024-07-09T19:19:36+02:00",
+      "createdAt": "2024-07-09T19:19:44+02:00",
+      "paidAt": "2024-07-09T19:19:43+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 80,
+      "finalPriceWithoutTax": "66.12",
+      "taxSummaries": {
+        "21": "13.88"
+      },
+      "taxes": [
+        {
+          "vat": "21",
+          "totalVat": "13.88",
+          "totalWithoutVat": "66.12"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "80"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T19:19:44+02:00"
+    },
+    {
+      "billId": "TM2024023164",
+      "sessionCreated": "2024-07-09T19:14:33+02:00",
+      "createdAt": "2024-07-09T19:14:44+02:00",
+      "paidAt": "2024-07-09T19:14:44+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 200,
+      "finalPriceWithoutTax": "165.29",
+      "taxSummaries": {
+        "21": "34.71"
+      },
+      "taxes": [
+        {
+          "vat": "21",
+          "totalVat": "34.71",
+          "totalWithoutVat": "165.29"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "200"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T19:14:44+02:00"
+    },
+    {
+      "billId": "TM2024023163",
+      "sessionCreated": "2024-07-09T19:01:40+02:00",
+      "createdAt": "2024-07-09T19:01:48+02:00",
+      "paidAt": "2024-07-09T19:01:47+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 115,
+      "finalPriceWithoutTax": "102.68",
+      "taxSummaries": {
+        "12": "12.32"
+      },
+      "taxes": [
+        {
+          "vat": "12",
+          "totalVat": "12.32",
+          "totalWithoutVat": "102.68"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "115"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T19:01:48+02:00"
+    },
+    {
+      "billId": "TM2024023162",
+      "sessionCreated": "2024-07-09T18:50:40+02:00",
+      "createdAt": "2024-07-09T18:50:46+02:00",
+      "paidAt": "2024-07-09T18:50:46+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 100,
+      "finalPriceWithoutTax": "82.64",
+      "taxSummaries": {
+        "21": "17.36"
+      },
+      "taxes": [
+        {
+          "vat": "21",
+          "totalVat": "17.36",
+          "totalWithoutVat": "82.64"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "100"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T18:50:46+02:00"
+    },
+    {
+      "billId": "TM2024023161",
+      "sessionCreated": "2024-07-09T18:50:17+02:00",
+      "createdAt": "2024-07-09T18:50:28+02:00",
+      "paidAt": "2024-07-09T18:50:27+02:00",
+      "fiscalizedAt": null,
+      "finalPrice": 151,
+      "finalPriceWithoutTax": "128.18",
+      "taxSummaries": {
+        "12": "5.46",
+        "21": "17.36"
+      },
+      "taxes": [
+        {
+          "vat": "12",
+          "totalVat": "5.46",
+          "totalWithoutVat": "45.54"
+        },
+        {
+          "vat": "21",
+          "totalVat": "17.36",
+          "totalWithoutVat": "82.64"
+        }
+      ],
+      "discount": 0,
+      "rounding": 0,
+      "tips": 0,
+      "currencyCode": "CZK",
+      "refunded": false,
+      "refundedBillIdentifier": null,
+      "paymentMethod": "card",
+      "payments": [
+        {
+          "paymentMethod": "card",
+          "priceWithVat": "151"
+        }
+      ],
+      "createdBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "paidBy": {
+        "personId": 146,
+        "fullName": "Rozálie Vacková",
+        "userName": "rozarka_vackova"
+      },
+      "personCount": 1,
+      "deskId": "2",
+      "issuedAsVatPayer": true,
+      "fiscalData": null,
+      "invoiceData": null,
+      "customerId": null,
+      "orderProvider": null,
+      "_lastModifiedAt": "2024-07-09T18:50:28+02:00"
+    }
+  ],
+  "nextPage": "/bills/60b6512e66943300381c2d24-60b6512e66943300381c2d25?from=2024-07-08T05%3A28%3A26.000Z&till=2024-07-10T05%3A28%3A26.000Z&limit=10&refunded=0&lastBillId=TM2024023161",
+  "ok": 1
+}

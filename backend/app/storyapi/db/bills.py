@@ -134,8 +134,15 @@ class BillsList(APIModel):
     nextPage: "/bills/5a75b658f60a3c15009312f1-5a75b658f60a3c15009312f2?lastBillId=BA2018000001"
     """
     data: List[Bills] = Field(default_factory=list, alias='data')
-    nextPage: Any | None
+    next_page: Any | None = Field(default=None, alias='nextPage')
     ok: bool | None = Field(default=None)
+
+    def check_place_id(self, place_id: str):
+        if self.next_page is None and place_id is not None:
+            for i, d in enumerate(self.data):
+                self.data[i].place_id = place_id
+
+        return self
 
     @model_validator(mode="before")
     def fill_empty_fields(cls, v):

@@ -1,14 +1,19 @@
+import json
 from datetime import datetime, timedelta
 
 import pytest
 
+from migrations import get_merchant
 from storyapi.config.settings import settings
 from storyapi.db import SourceId
 from storyapi.db.auth import AuthSQL
+from storyapi.db.bills import BillsList
 from storyapi.db.repos.auth import ClientsAndAuthRepositorySQL
 from storyapi.db.merchants import Merchant
 from storyapi.db.merchants_sql import MerchantsSQL
+from storyapi.db.repos.bills_sql import BillsRepositorySQL
 from storyapi.db.repos.marchants_sql import MerchantsRepositorySQL
+from storyapi.service.bills import BillsListAPI
 
 
 @pytest.fixture(name="merchant_sql")
@@ -43,6 +48,47 @@ def get_bills_sql(mId):
     }
 
     return Merchant(**res)
+
+
+@pytest.fixture(name="merchant_place")
+def get_merchant_place(mId):
+    merchant_id, place_id = get_merchant(mId)
+
+    return merchant_id, place_id
+
+
+@pytest.fixture(name="source_id_work")
+def get_source_id_work(merchant_place):
+    merchant_id, place_id = merchant_place
+    source = SourceId(**dict(
+        merchant_id=merchant_id,
+        place_id=place_id,
+        from_date=datetime.utcnow() - timedelta(
+            days=2  # week == 1 return 7 bills
+        ),  # ISO format,
+        till_date=datetime.utcnow(),
+        limit=10,
+        refunded=False
+    ))
+
+    return source
+
+
+@pytest.fixture(name="json_filename")
+def get_json_filename():
+    """ file name w/o extension """
+    filename = 'bills_list'
+    return filename
+
+
+@pytest.fixture(name="load_test_json")
+def get_test_json(source_id_work, json_filename):
+    with open(f'./source/json/{json_filename}.json') as f:
+        json_str = f.read()
+        test_json = json.loads(json_str)
+        # test_json = json.dumps(d)
+
+    return test_json
 
 
 def test_client_and_auth():
@@ -83,3 +129,22 @@ def test_get_store_bills(merchant_sql):
     ))
 
     assert isinstance(source, SourceId)
+
+
+def test_store_batch(load_test_json, source_id_work):
+    next_page = load_test_json["nextPage"]
+    load_test_json["nextPage"] = None
+    bills_list = BillsList(**load_test_json)
+    assert isinstance(bills_list, BillsList)
+    assert bills_list.data[0].place_id is None
+    bills_list.check_place_id(place_id=source_id_work.place_id)
+    assert bills_list.data[0].place_id is not None
+
+    load_test_json["nextPage"] = next_page
+
+    bills_list = BillsList(**load_test_json)
+    assert isinstance(bills_list, BillsList)
+    assert bills_list.data[0].place_id is not None
+    bills_list.check_place_id(place_id=source_id_work.place_id)
+    BillsRepositorySQL().create_batch_with_fk(bills_list.data)
+
