@@ -2,6 +2,7 @@
 Storyous demo
 API migration data without saving to MSSQL.
 for test download stability & performance issues of API endpoints.
+Inside storyapi.config.settings set settings.mssql_host to None
 """
 from datetime import datetime, timedelta
 from typing import List, Dict

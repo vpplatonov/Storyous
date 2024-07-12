@@ -8,4 +8,3 @@ DB_PRIMARY_KEY = "pid"
 SCHEMA_BY_ALIAS = False
 SQL_REPOSITORY_POSTFIX = "RepositorySQL"
 DB_PLUGIN_PATH_ADD = ".repos"
-
