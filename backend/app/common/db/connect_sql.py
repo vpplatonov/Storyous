@@ -1,4 +1,5 @@
 import struct
+from functools import lru_cache
 from typing import Optional, Union
 
 import pymssql
@@ -96,6 +97,7 @@ def get_mssql_connection(as_dict: bool = True, **kwargs):
         connection.close()
 
 
+@lru_cache(maxsize=5)
 def get_connection() -> Union[pyodbc.Connection, pymssql.Connection]:
     """ using next() to return connection itself """
 
