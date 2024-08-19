@@ -1,5 +1,5 @@
 # Storyous
-Download data from API to MSSQL DB
+Download data from API to Azure MSSQL DB
 
 #### run:
     backend/app$ python migration_demo.py

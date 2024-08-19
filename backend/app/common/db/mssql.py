@@ -56,6 +56,23 @@ def reconnect_on_exception(func):
     return wrapper
 
 
+def with_transaction(func):
+    """ Decorator for wrap DB transaction with rollback()/commit() """
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            data = func(self, *args, **kwargs)
+        except (pymssql.Error, pyodbc.Error) as e:
+            self.client.rollback()
+            print(str(e))
+            raise CrudDataMSSQLError(str(e)) from e
+        else:
+            self.client.commit()
+            return data
+
+    return wrapper
+
+
 class CrudDataMSSQLError(Exception):
     """ raise this exception for all CRUD data incompatibility """
 
@@ -260,8 +277,8 @@ class RepositoryMSSQL(Generic[T]):
                     model.__dict__.update(ex_data.dict())
                     result = repos.update_with_cursor(
                         model,
-                        query={self.primary_key: getattr(model, self.primary_key)},
-                        cursor=cursor
+                        cursor=cursor,
+                        query={self.primary_key: getattr(model, self.primary_key)}
                     )
                 else:
                     setattr(ex_data, foreign_key, res[self.primary_key])
@@ -575,6 +592,20 @@ class RepositoryMSSQL(Generic[T]):
             self.client.commit()
             return res
 
+    @with_transaction
+    @reconnect_on_exception
+    def create_data_apply_excluded(self, data, exclude_data):
+        """ it can be decorated with reconnect_on_exception """
+        with self.client.cursor() as cursor:
+            res = self.create_with_cursor(data, cursor)
+            rs = self._apply_excluded_fields_data(
+                excluded_data=exclude_data,
+                source_data=data,
+                res=res,
+                cursor=cursor
+            )
+        return res
+
     def create_with_fk(self, data: T):
         """ Create API for 1:M fields """
 
@@ -583,23 +614,9 @@ class RepositoryMSSQL(Generic[T]):
         convert_data = self._get_converted_fields_data(data)  # primary keys
         self._set_converted_field_data(data, convert_data)
 
-        try:
-            with self.client.cursor() as cursor:
-                # next line keep outside of SQL API: apps specific
-                rs = self.converted_select_insert(convert_data, cursor)
-                res = self.create_with_cursor(data, cursor)
-                rs = self._apply_excluded_fields_data(
-                    excluded_data=exclude_data,
-                    source_data=data,
-                    res=res,
-                    cursor=cursor
-                )
-        except (pymssql.Error, pyodbc.Error) as e:
-            self.client.rollback()
-            raise CrudDataMSSQLError(str(e)) from e
-        else:
-            self.client.commit()
-            return res
+        res = self.create_data_apply_excluded(data, exclude_data)
+
+        return res
 
     def create_many_with_cursor(
             self,
@@ -652,7 +669,12 @@ class RepositoryMSSQL(Generic[T]):
 
         return sql_query
 
-    def update_with_cursor(self, data: T, query: Union[dict, str], cursor: pymssql.Cursor):
+    def update_with_cursor(
+            self,
+            data: T,
+            cursor: Union[pymssql.Cursor, pyodbc.Cursor],
+            query: Union[dict, str, int, T] = None
+    ):
         sql_query = self._update_sql_query(data, query)
         self._cursor_execute(
             sql_query,
@@ -671,6 +693,22 @@ class RepositoryMSSQL(Generic[T]):
 
         return data
 
+    @with_transaction
+    @reconnect_on_exception
+    def update_data_update_excluded(self, data: T, exclude_data, query: Union[str, int, Dict] = None):
+        """ can be wrapped with """
+        query = self._get_key_dict(query or data)
+        with self.client.cursor() as cursor:
+            num_count = self.update_with_cursor(data, cursor, query)
+            rs = self._update_excluded_fields_data(
+                excluded_data=exclude_data,
+                source_data=data,
+                res=query,
+                cursor=cursor
+            )
+
+        return num_count
+
     def update_with_fk(self, data: T, query: Dict):
 
         exclude_data = self._get_excluded_fields_data(data)
@@ -678,22 +716,9 @@ class RepositoryMSSQL(Generic[T]):
         convert_data = self._get_converted_fields_data(data)
         self._set_converted_field_data(data, convert_data)
 
-        try:
-            with self.client.cursor() as cursor:
-                num_count = self.update_with_cursor(data, query, cursor)
-                rs = self._update_excluded_fields_data(
-                    excluded_data=exclude_data,
-                    source_data=data,
-                    res=query,
-                    cursor=cursor
-                )
-        except (pymssql.Error, pyodbc.Error) as e:
-            self.client.rollback()
-            print(str(e))
-            raise CrudDataMSSQLError(str(e)) from e
-        else:
-            self.client.commit()
-            return num_count
+        num_count = self.update_data_update_excluded(data, exclude_data, query)
+
+        return num_count
 
     def delete_with_cursor(
             self,
