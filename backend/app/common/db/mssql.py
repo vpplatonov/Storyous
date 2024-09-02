@@ -175,6 +175,7 @@ class RepositoryMSSQL(Generic[T]):
 
     @staticmethod
     def _get_field_plugin(field_data: APIModelSQL) -> Optional[str]:
+        """ get plugin name from field data """
         return field_data.__class__.__module__.replace("_sql", "")
 
     @staticmethod
@@ -466,11 +467,11 @@ class RepositoryMSSQL(Generic[T]):
 
         return data
 
+    @with_transaction
     def create(self, data: Union[T, Dict]) -> Dict:
         sql_query = self._create_sql_query(data)
         sql_query = self.sql_before_execute(sql_query)
         data = self.exec_fetch_one(sql_query=sql_query)
-        self.client.commit()
 
         return data
 
@@ -559,10 +560,30 @@ class RepositoryMSSQL(Generic[T]):
                 v.extend(converted_data[key])
             converted_data.update({key: v})
 
+    @with_transaction
+    @reconnect_on_exception
+    def create_batch_data_apply_excluded(self, data_batch, converted_data, exclude_data):
+        res = {}
+        with self.client.cursor() as cursor:
+            # next line keep outside of SQL API: apps specific
+            rs = self.converted_select_insert_batch(converted_data, cursor)  # ignore
+            res.update(rs)
+            rs = self.create_batch_with_cursor(data_batch, cursor)  # return num_rows inserted
+            res.update(rs)
+            if exclude_data and not self.pk_remove_on_create:  # PRIMARY keys already defined
+                rs = self._apply_batch_excluded_fields_data(
+                    excluded_data=exclude_data,
+                    source_data=data_batch,
+                    res=rs[self.primary_key],  # list of inserted keys
+                    cursor=cursor
+                )
+                res.update(rs)
+
+        return res
+
     def create_batch_with_fk(self, data_batch: List[T], excluded: bool = False):
         exclude_data = []
         converted_data = {}
-        res = {}
         for i, data in enumerate(data_batch):
             if excluded:
                 exclude_data.append(self._get_excluded_fields_data(data))  # foreign keys
@@ -570,27 +591,9 @@ class RepositoryMSSQL(Generic[T]):
             self._set_converted_field_data(data_batch[i], convert_data)
             self._update_converted_data(converted_data, convert_data)
 
-        try:
-            with self.client.cursor() as cursor:
-                # next line keep outside of SQL API: apps specific
-                rs = self.converted_select_insert_batch(converted_data, cursor)  # ignore
-                res.update(rs)
-                rs = self.create_batch_with_cursor(data_batch, cursor)  # return num_rows inserted
-                res.update(rs)
-                if exclude_data and not self.pk_remove_on_create:  # PRIMARY keys already defined
-                    rs = self._apply_batch_excluded_fields_data(
-                        excluded_data=exclude_data,
-                        source_data=data_batch,
-                        res=rs[self.primary_key],  # list of inserted keys
-                        cursor=cursor
-                    )
-                    res.update(rs)
-        except (pymssql.Error, pyodbc.Error) as e:
-            self.client.rollback()
-            raise CrudDataMSSQLError(str(e)) from e
-        else:
-            self.client.commit()
-            return res
+        res = self.create_batch_data_apply_excluded(data_batch, converted_data, exclude_data)
+
+        return res
 
     @with_transaction
     @reconnect_on_exception
@@ -640,6 +643,7 @@ class RepositoryMSSQL(Generic[T]):
 
         return result
 
+    @with_transaction
     def create_many(self, data: List[T], query: Dict) -> Dict:
         # ODBC driver has limitation 1000 row at a time
         sql_query = self.json_to_sql.get_mssql_insert_many(
@@ -647,7 +651,6 @@ class RepositoryMSSQL(Generic[T]):
             key_value=query
         )
         result = self.exec_fetch_one(sql_query=sql_query)
-        self.client.commit()
 
         return result
 
@@ -685,11 +688,11 @@ class RepositoryMSSQL(Generic[T]):
 
         return data
 
+    @with_transaction
     def update(self, data: T, query: Union[dict, str]) -> Dict:
         sql_query = self._update_sql_query(data, query)
         sql_query = self.sql_before_execute(sql_query)
         data = self.exec_fetch_one(sql_query=sql_query)  # return num rows updated (1)
-        self.client.commit()
 
         return data
 
@@ -738,6 +741,7 @@ class RepositoryMSSQL(Generic[T]):
 
         return result
 
+    @with_transaction
     def delete(self, data: Optional[Union[T, dict]] = None, query: Dict = None):
         """ query for delete many rows """
 
@@ -746,7 +750,6 @@ class RepositoryMSSQL(Generic[T]):
         )
         sql_query = self.sql_before_execute(sql_query)
         result = self.exec_fetch_one(sql_query=sql_query)   # return num rows deleted (1)
-        self.client.commit()
 
         return result
 
